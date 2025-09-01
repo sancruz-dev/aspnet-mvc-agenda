@@ -1,0 +1,111 @@
+﻿@model AgendaContatosMVC.Models.Contato
+
+@if (TempData["Mensagem"] != null)
+{
+    <div class="alert alert-warning">
+        @TempData["Mensagem"]
+    </div>
+}
+
+@{
+    var contatos = ViewBag.Contatos as List<AgendaContatosMVC.Models.Contato>;
+    ViewData["Title"] = "Agenda de Contatos";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Agenda de Contatos</h1>
+
+    <!-- FORMULÁRIO -->
+    <div class="card mb-4">
+        <div class="card-header">
+            @(Model.Id == 0 ? "Novo Contato" : $"Editar Contato #{Model.Id}")
+        </div>
+        <div class="card-body">
+            <form asp-action="Save" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="mb-3">
+                    <label asp-for="Nome" class="form-label"></label>
+                    <input asp-for="Nome" class="form-control" />
+                    <span asp-validation-for="Nome" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Telefone" class="form-label"></label>
+                    <input asp-for="Telefone" class="form-control" />
+                    <span asp-validation-for="Telefone" class="text-danger"></span>
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="Ativo" class="form-check-input" />
+                    <label asp-for="Ativo" class="form-check-label"></label>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                @if (Model.Id != 0)
+                {
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                }
+            </form>
+        </div>
+    </div>
+
+    <!-- Formulário de Pesquisa -->
+    <div class="mb-4">
+        <form asp-action="PesquisarPorId" method="get" class="d-inline">
+            <div class="input-group mb-2">
+                <input type="number" name="id" class="form-control" placeholder="Pesquisar por Id" required />
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
+            </div>
+        </form>
+
+        <form asp-action="PesquisarPorNome" method="get" class="d-inline">
+            <div class="input-group mb-2">
+                <input type="text" name="nome" class="form-control" placeholder="Pesquisar por Nome" required />
+                <button type="submit" class="btn btn-secondary">Pesquisar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- LISTA DE CONTATOS -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Status</th>
+                <th style="width: 180px;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (contatos != null && contatos.Any())
+            {
+                foreach (var c in contatos)
+                {
+                    <tr>
+                        <td>@c.Nome</td>
+                        <td>@c.Telefone</td>
+                        <td>@(c.Ativo ? "Ativo" : "Inativo")</td>
+                        <td>
+                            <a asp-action="Index" asp-route-id="@c.Id" class="btn btn-sm btn-warning">Editar</a>
+
+                            <form asp-action="Delete" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@c.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Deseja excluir este contato?');">
+                                    Excluir
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center">Nenhum contato cadastrado.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
